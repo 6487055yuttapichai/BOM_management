@@ -23,7 +23,7 @@ class BOM_ManagementBackend:
     
     def fetch_data(self) -> pd.DataFrame:
         logger.info(f"| Fetching data in BOM table")
-        sql = """SELECT item_id, description FROM dbo.BOM_items"""
+        sql = """SELECT item_id, description FROM dbo.bom_master"""
         summary_df = pd.DataFrame()
         try:
             summary_df = pgsql.sql_to_df(query=sql, db='BOM_Management', mod='BOM_data')
@@ -33,14 +33,14 @@ class BOM_ManagementBackend:
             logger.error(f"| Exception | {str(ex)}")
             return summary_df
 
-    def insert_into_BOM_items(self, item_id, description):
+    def insert_into_bom_master(self, item_id, description):
         logger.info(f"| Insert data into BOM table")
         conn = self.pg_connect()
         cursor = conn.cursor()
         try:
             cursor.execute(
                 """
-                INSERT INTO dbo.BOM_items (item_id, description)
+                INSERT INTO dbo.bom_master (item_id, description)
                 VALUES (%s, %s)
                 ON CONFLICT (item_id) DO NOTHING
                 """,
@@ -55,14 +55,14 @@ class BOM_ManagementBackend:
             cursor.close()
             conn.close()
 
-    def update_BOM_items_only(self, item_id, description):
+    def update_bom_master_only(self, item_id, description):
         logger.info(f"| Update data in BOM table")
         conn = self.pg_connect()
         cursor = conn.cursor()
         try:
             cursor.execute(
                 """
-                UPDATE dbo.BOM_items
+                UPDATE dbo.bom_master
                 SET description = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE item_id = %s;
@@ -77,14 +77,14 @@ class BOM_ManagementBackend:
             cursor.close()
             conn.close()
 
-    def delete_BOM_items_only(self, item_id):
+    def delete_bom_master_only(self, item_id):
         logger.info(f"| Delete data {item_id} in BOM table")
         conn = self.pg_connect()
         cursor = conn.cursor()
         try:
             cursor.execute(
                 """
-                DELETE FROM dbo.BOM_items
+                DELETE FROM dbo.bom_master
                 WHERE item_id = %s
                 """,
                 (item_id,)
@@ -163,3 +163,5 @@ class BOM_ManagementBackend:
         wb.save(output)
         output.seek(0)
         return output
+    
+        

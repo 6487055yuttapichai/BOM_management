@@ -104,8 +104,12 @@ def BOM_Management_page():
 
     # Data
     df_table = pd.DataFrame(columns=["item_id", "description"])
-    table = pn.widgets.Tabulator(df_table, pagination="local", page_size=20,
-                                 sizing_mode="stretch_width", selectable=True)
+    table = pn.widgets.Tabulator(df_table, 
+                                 pagination="local", 
+                                 page_size=20,
+                                 sizing_mode="stretch_width", 
+                                 show_index=False,
+                                 selectable=True)
 
     btn_table_csv_download = pn.widgets.FileDownload(backend.csv_download_callback(),
                                                      filename='BOM.csv',
@@ -155,7 +159,7 @@ def BOM_Management_page():
         item_id = selected_row["item_id"]
         new_description = selected_row["description"]
 
-        msg = backend.update_BOM_items_only(item_id, new_description)
+        msg = backend.update_bom_master_only(item_id, new_description)
         output_area.object = msg if msg else f"Updated {item_id} successfully"
 
     # -----------------------
@@ -169,7 +173,7 @@ def BOM_Management_page():
         selected_row = table.value.iloc[row_index]
         item_id = selected_row["item_id"]
 
-        msg = backend.delete_BOM_items_only(item_id)
+        msg = backend.delete_bom_master_only(item_id)
         output_area.object = msg if msg else f"Deleted {item_id} successfully"
 
         # Remove row from UI table
@@ -194,7 +198,7 @@ def BOM_Management_page():
         manual_item_id.value = ""
         manual_description.value = ""
         output_area.object = "Inserted new record manually."
-        msg = backend.insert_into_BOM_items(item, desc)
+        msg = backend.insert_into_bom_master(item, desc)
         output_area.object = f"Inserted into DB.\n\n**{msg}**"
 
     
@@ -222,6 +226,7 @@ def BOM_Management_page():
     insert_manual_button.on_click(insert_manual_data)
     search_box.param.watch(filter_table, "value")
 
+
     # Load custom template
     template_path = Path('apps/app_BOM_Management/templates/template_BOM_Management.html')
     template_str = template_path.read_text(encoding="utf-8")
@@ -239,7 +244,7 @@ def BOM_Management_page():
         search_box,
         output_area,
         table,
-        sizing_mode="stretch_width"
+        sizing_mode="stretch_width",
     )
     template.add_panel('BOM_Management', controls_column)
     template.add_panel('xl_download', btn_table_excel_download)
