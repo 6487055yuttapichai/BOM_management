@@ -60,4 +60,57 @@ VALUES
 ('01346816','TUBING, PLASTIC. 1/4 OD, YELLOW, SAE J844 TYPE A', 'A', '1/4', 'YELLOW', 6.35, 0.08, 1.00, 0.08),
 ('01346824','TUBING, PLASTIC. 1/4 OD, BLUE, SAE J844 TYPE A', 'A', '1/4', 'BLUE', 6.35, 0.08, 1.00, 0.08),
 ('01346832','TUBING, PLASTIC. 1/4 OD, RED, SAE J844 TYPE A', 'A', '1/4', 'RED', 6.35, 0.08, 1.00, 0.08)
+
+INSERT INTO dbo.bom_master (
+    item_id,
+    description,
+    type,
+    nominal_tubing_size,
+    color,
+    tubing,
+    tubing_tolerance,
+    wall_thickness,
+    wall_thickness_tolerance
+)
+values
+('00012435','TUBING, PLASTIC. 3/8 OD, BROWN, SAE J844 TYPE B', 'B', '3/4', 'BROWN', 9.35, 0.10, 1.57, 0.10),
+('00012443','TUBING, PLASTIC. 3/8 OD, GREEN, SAE J844 TYPE B', 'B', '3/4', 'GREEN', 9.35, 0.10, 1.57, 0.10),
+('00012450','TUBING, PLASTIC. 3/8 OD, ORANGE, SAE J844 TYPE B', 'B', '3/4', 'ORANGE', 9.35, 0.10, 1.57, 0.10),
+('00013086','TUBING, PLASTIC. 3/8 OD, GRAY, SAE J844 TYPE B', 'B', '3/4', 'GRAY', 9.35, 0.10, 1.57, 0.10),
+('00989319','TUBING, PLASTIC. 3/8 OD, BLACK, SAE J844 TYPE B', 'A', '1/4', 'BLACK', 9.35, 0.10, 1.57, 0.10),
+('01220037','TUBING, PLASTIC. 3/8 OD, RED, SAE J844 TYPE B', 'B', '3/4', 'RED', 9.35, 0.10, 1.57, 0.10),
+('01346857','TUBING, PLASTIC. 3/8 OD, BLUE, SAE J844 TYPE B', 'B', '3/4', 'BLUE', 9.35, 0.10, 1.57, 0.10)
+
+INSERT INTO dbo.bom_master (
+    item_id,
+    description,
+    type,
+    nominal_tubing_size,
+    color,
+    tubing,
+    tubing_tolerance,
+    wall_thickness,
+    wall_thickness_tolerance
+)
+values
+('01197177','TUBING, PLASTIC. 1/2 OD, SILVER, SAE J844 TYPE B', 'B', '1/2', 'SILVER', 12.70, 0.13, 1.57, 0.10),
+('01346865','TUBING, PLASTIC. 1/2 OD, BLACK, SAE J844 TYPE B', 'B', '1/2', 'BLACK', 12.70, 0.13, 1.57, 0.10),
+('01346873','TUBING, PLASTIC. 1/2 OD, BLUE, SAE J844 TYPE B', 'B', '1/2', 'BLUE', 12.70, 0.13, 1.57, 0.10),
+('01346881','TUBING, PLASTIC. 1/2 OD, RED, SAE J844 TYPE B', 'B', '1/2', 'RED', 12.70, 0.13, 1.57, 0.10),
+
+INSERT INTO dbo.bom_master (
+    item_id,
+    description,
+    type,
+    nominal_tubing_size,
+    color,
+    tubing,
+    tubing_tolerance,
+    wall_thickness,
+    wall_thickness_tolerance
+)
+values
+('01643295','TUBING, PLASTIC. 5/8 OD, BLUE, SAE J844 TYPE B', 'B', '5/8', 'BLUE', 15.88, 0.13, 2.34, 0.13),
+('04760328','TUBING, PLASTIC. 5/8 OD, GREEN, SAE J844 TYPE B', 'B', '5/8', 'GREEN', 15.88, 0.13, 2.34, 0.13),
+('04760330','TUBING, PLASTIC. 5/8 OD, ORANGE, SAE J844 TYPE B', 'B', '5/8', 'ORANGE', 15.88, 0.13, 2.34, 0.13),
 ```

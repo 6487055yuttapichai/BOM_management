@@ -1,7 +1,7 @@
 import panel as pn
 import pandas as pd
 from pathlib import Path
-from apps.app_BOM_Management.BOM_Management import BOM_ManagementBackend
+from apps.Monitor_folder_by_page.Monitor_folder_by_page import Monitor_folder_backend
 from shared.tdm_logging import logger, log_error, class_method_name
 
 raw_css =[
@@ -78,35 +78,39 @@ pn.extension('tabulator',
              raw_css=raw_css,
              )
 
-backend = BOM_ManagementBackend()
+backend = Monitor_folder_backend()
 
-def BOM_Management_page():
+def Monitor_folder_page():
     # Load custom template
-    template_path = Path('apps/app_BOM_Management/templates/template_BOM_Management.html')
+    template_path = Path('apps/Monitor_folder_by_page/templates/template_Monitor_folder.html')
     template_str = template_path.read_text(encoding="utf-8")
     template = pn.Template(template=template_str)
 
     # Header
-    header_html = "<h4 class='page-title mb-0'>BOM Management</h4>"
+    header_html = "<h4 class='page-title mb-0'>Monitor folder</h4>"
     template.add_panel('header', pn.Row(pn.pane.HTML(header_html)))
 
-    # -----------------------
-    # Extract controls
-    controls_column = pn.Column(
-        pn.Row(backend.insert_button, backend.update_button, backend.delete_button),
-        backend.pop_up_insert_form,
-        backend.search_box,
-        backend.output_area,
-        backend.table,
+    Monitor_folder = pn.Column(
+        backend.btn_refresh,
+        pn.Row(
+            pn.Column(
+                backend.input_select,
+                backend.upload_input,
+                backend.btn_upload,
+                backend.btn_delete_input,
+            ),
+            pn.Column(
+                backend.output_select,
+                backend.btn_download_all,
+                backend.btn_download_output,
+                backend.btn_delete_output,
+            ),
+        ),
         sizing_mode="stretch_width",
     )
-    template.add_panel('BOM_Management', controls_column)
-    template.add_panel('xl_download', backend.btn_table_excel_download)
-    template.add_panel('csv_download',backend.btn_table_csv_download) 
+    template.add_panel('Monitor_folder', Monitor_folder)
 
-    pn.state.onload(lambda: backend.select_data())
     return template
 
-# Serve the app
-app = BOM_Management_page()
+app = Monitor_folder_page()
 app.servable()

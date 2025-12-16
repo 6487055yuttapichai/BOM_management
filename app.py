@@ -4,9 +4,11 @@ import threading
 
 from apps.TXT_to_CSV.watchdog_service import start_watchdog
 from apps.app_BOM_Management.app_BOM_Management import BOM_Management_page
+from apps.Monitor_folder_by_page.app_Monitor_folder_by_page import Monitor_folder_page
 pn.extension()
 
 ROUTES = {
+    "Monitor_folder": Monitor_folder_page,
     "BOM_Management": BOM_Management_page,
 }
 
