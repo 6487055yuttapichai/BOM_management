@@ -226,7 +226,7 @@ def BOM_Management_page():
     insert_manual_button.on_click(insert_manual_data)
     search_box.param.watch(filter_table, "value")
 
-
+    
     # Load custom template
     template_path = Path('apps/app_BOM_Management/templates/template_BOM_Management.html')
     template_str = template_path.read_text(encoding="utf-8")
@@ -249,7 +249,27 @@ def BOM_Management_page():
     template.add_panel('BOM_Management', controls_column)
     template.add_panel('xl_download', btn_table_excel_download)
     template.add_panel('csv_download', btn_table_csv_download)
-
+    
+    Monitor_folder = pn.Column(
+        backend.btn_refresh,
+        pn.Row(
+            pn.Column(
+                backend.input_select,
+                backend.upload_input,
+                backend.btn_upload,
+                backend.btn_delete_input,
+            ),
+            pn.Column(
+                backend.output_select,
+                backend.btn_download_all,
+                backend.btn_download_output,
+                backend.btn_delete_output,
+            ),
+        ),
+        sizing_mode="stretch_width",
+    )
+    template.add_panel('Monitor_folder', Monitor_folder)
+    
     pn.state.onload(lambda: select_data(None))
     return template
 

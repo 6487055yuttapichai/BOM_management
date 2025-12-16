@@ -1,15 +1,22 @@
 from pathlib import Path
 import panel as pn
+import threading
 
+from apps.TXT_to_CSV.watchdog_service import start_watchdog
 from apps.app_BOM_Management.app_BOM_Management import BOM_Management_page
-from apps.app_extract_file.app_extract_file import extract_file_page
-
 pn.extension()
 
 ROUTES = {
-    "BOM_Managementpy": BOM_Management_page,
-    "extract_file_page": extract_file_page,
+    "BOM_Management": BOM_Management_page,
 }
+
+# ===== START WATCHDOG =====
+watchdog_thread = threading.Thread(
+    target=start_watchdog,
+    daemon=True
+)
+watchdog_thread.start()
+
 
 pn.serve(ROUTES,
          port=5006,
