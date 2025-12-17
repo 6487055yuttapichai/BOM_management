@@ -34,7 +34,6 @@ class TxtFileHandler(FileSystemEventHandler):
             current_item_number = None
             Inv_Unt = None
             Net_Quantity = None
-            seen_items = set()
 
             # read txt file
             with open(file_path, "r", encoding="utf-8") as f:
@@ -49,11 +48,9 @@ class TxtFileHandler(FileSystemEventHandler):
                         Inv_Unt = columns[11]
                         Net_Quantity = columns[12]
                 match = re.search(r'"([^"]+)"', line)
-                if match and current_item_number and current_item_number not in seen_items:
+                if match and current_item_number:
                     desc = match.group(1).strip()
                     tubing_items.append((current_item_number, desc, Inv_Unt, Net_Quantity))
-                    seen_items.add(current_item_number)
-
             Item_In_DB = Matching_file_with_DB(tubing_items)
             
             # Create DataFrame
@@ -82,7 +79,7 @@ def Matching_file_with_DB(data_from_txt):
     except Exception as e:
         logger.error(f"| Error querying database: {e}")
         return []
-
+    
     items_in_db = [
         (item[0], item[1], item[2], item[3])
         for item in data_from_txt
