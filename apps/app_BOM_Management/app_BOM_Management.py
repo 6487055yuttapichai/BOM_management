@@ -93,12 +93,13 @@ def BOM_Management_page():
     # -----------------------
     # Extract controls
     controls_column = pn.Column(
-        pn.Row(backend.insert_button, backend.update_button, backend.delete_button),
-        backend.pop_up_insert_form,
-        backend.search_box,
+        pn.Row(backend.insert_button, backend.delete_button),
         backend.output_area,
+        backend.search_box,
         backend.table,
-        sizing_mode="stretch_width",
+        backend.pop_up_insert_form,
+        backend.pop_up_edit_form,
+        height=900
     )
     template.add_panel('BOM_Management', controls_column)
     template.add_panel('xl_download', backend.btn_table_excel_download)

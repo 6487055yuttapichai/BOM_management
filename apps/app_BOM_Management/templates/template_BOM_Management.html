@@ -76,22 +76,29 @@
     <div class="content-wrapper">
         <div class="content">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 text-center">BOM Management</h5>
-                </div>
-                <div class="dropdown d-inline-flex ms-3">
-                    <a href="#" class="text-body d-inline-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="ph-export"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end">
-                        {% block xl_download %}
-                        {{ embed(roots.xl_download) }}
-                        {% endblock %}
-                        {% block csv_download %}
-                        {{ embed(roots.csv_download) }}
-                        {% endblock %}
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <!-- Title centered via flex-grow -->
+                    <div class="flex-grow-1 d-flex justify-content-center">
+                        <h5 class="mb-0 text-center">BOM Management</h5>
+                    </div>
+
+                    <!-- Dropdown positioned on top-right -->
+                    <div class="dropdown d-inline-flex">
+                        <a href="#" class="text-body d-inline-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="ph-export"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            {% block xl_download %}
+                            {{ embed(roots.xl_download) }}
+                            {% endblock %}
+                            {% block csv_download %}
+                            {{ embed(roots.csv_download) }}
+                            {% endblock %}
+                        </div>
                     </div>
                 </div>
+
                 <div class="card-body pb-0">
                     {% block BOM_Management %}
                     {{ embed(roots.BOM_Management) }}
