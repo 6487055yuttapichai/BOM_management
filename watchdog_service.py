@@ -7,12 +7,23 @@ from watchdog.events import FileSystemEventHandler
 import time
 import os
 import re
-
+from pathlib import Path
 
 pgsql = PGSQL()
 
-WATCH_FOLDER = "apps/TXT_to_CSV/input_file"
-OUTPUT_FOLDER = "apps/TXT_to_CSV/output_file"
+# It will work only target folder has lower layer.
+def find_folder_down(root: Path, target: str, max_depth=5):
+    root = root.resolve()
+    for path in root.rglob(target):
+        if path.is_dir():
+            return path
+    raise FileNotFoundError(f"Cannot find folder '{target}' under {root}")
+
+BASE_DIR = find_folder_down(Path.cwd(), "TXT_to_CSV")
+
+WATCH_FOLDER = BASE_DIR / "input_file"
+OUTPUT_FOLDER = BASE_DIR / "output_file"
+
 
 class TxtFileHandler(FileSystemEventHandler):
     def on_created(self, event):
@@ -56,7 +67,7 @@ class TxtFileHandler(FileSystemEventHandler):
             # Create DataFrame
             df =  pd.DataFrame(Item_In_DB, columns=["Item ID", "Description", "Inv Unt", "Net Quantity"])
             base_name = os.path.splitext(os.path.basename(file_path))[0]
-            df["chassi"] = base_name
+            # df["chassi"] = base_name
 
             # SAVE CSV FILE
             os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -102,3 +113,5 @@ def start_watchdog():
         observer.stop()
 
     observer.join()
+
+

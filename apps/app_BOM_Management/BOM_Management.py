@@ -21,17 +21,26 @@ class BOM_ManagementBackend:
 
         self.insert_button = pn.widgets.Button(
             name="Add new item",
-            button_type="primary"
+            button_type="primary",
+            width=200,
+            height=50
         )
 
         self.delete_button = pn.widgets.Button(
             name="Delete item ",
-            button_type="danger"
+            button_type="danger",
+            width=200,
+            height=50
         )
 
         self.search_box = pn.widgets.TextInput(
-            name="Search",
-            placeholder="Search Item ID or description..."
+            placeholder="Search Item ID or description...",
+            width=800,
+            height=50,
+            styles={
+                'border': '1px solid #000000',
+                'border-radius': '5px'       
+            }
         )
 
         # ---- insert manual
@@ -51,8 +60,8 @@ class BOM_ManagementBackend:
         )
         
         
-        self.btn_save_insert = pn.widgets.Button(name="Save", button_type="primary", width=250)
-        self.btn_cancel_insert = pn.widgets.Button(name="Cancel", width=250)
+        self.btn_save_insert = pn.widgets.Button(name="Save", button_type="primary", width=180)
+        self.btn_cancel_insert = pn.widgets.Button(name="Cancel", width=180)
 
         self.pop_up_insert_form = pn.layout.Modal(
             pn.Column(
@@ -69,7 +78,7 @@ class BOM_ManagementBackend:
                 pn.Row(self.btn_save_insert, self.btn_cancel_insert)
             ),
             open=False,
-            width=600,
+            width=420,
             height=650
         )
 
@@ -114,11 +123,13 @@ class BOM_ManagementBackend:
         self.table = pn.widgets.Tabulator(
             buttons={"edit": '<button class="btn btn-dark btn-sm">Edit</button>'},
             pagination="local",
-            page_size=20,
+            page_size=30,
             sizing_mode="stretch_width",
             show_index=False,
             disabled=True,
-            selectable=True
+            selectable=True,
+            theme = 'bootstrap5',
+            layout="fit_columns"
         )
 
         # ---- downloads
