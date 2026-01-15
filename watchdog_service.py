@@ -11,19 +11,14 @@ from pathlib import Path
 
 pgsql = PGSQL()
 
-# It will work only target folder has lower layer.
-def find_folder_down(root: Path, target: str, max_depth=5):
-    root = root.resolve()
-    for path in root.rglob(target):
-        if path.is_dir():
-            return path
-    raise FileNotFoundError(f"Cannot find folder '{target}' under {root}")
+#can change path e.g. C:/Bluebird_Bus
+Convert_Path = Path(r"D:/BOM_management/apps/TXT_to_CSV")
 
-BASE_DIR = find_folder_down(Path.cwd(), "TXT_to_CSV")
+WATCH_FOLDER = Convert_Path/"input_file"
+OUTPUT_FOLDER = Convert_Path/"output_file"
 
-WATCH_FOLDER = BASE_DIR / "input_file"
-OUTPUT_FOLDER = BASE_DIR / "output_file"
-
+WATCH_FOLDER.mkdir(parents=True, exist_ok=True)
+OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
 class TxtFileHandler(FileSystemEventHandler):
     def on_created(self, event):
