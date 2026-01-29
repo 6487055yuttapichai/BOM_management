@@ -62,7 +62,7 @@ class TxtFileHandler(FileSystemEventHandler):
             # Create DataFrame
             df =  pd.DataFrame(Item_In_DB, columns=["Item ID", "Description", "Inv Unt", "Net Quantity"])
             base_name = os.path.splitext(os.path.basename(file_path))[0]
-            # df["chassi"] = base_name
+            df["chassi"] = base_name
 
             # SAVE CSV FILE
             os.makedirs(OUTPUT_FOLDER, exist_ok=True)

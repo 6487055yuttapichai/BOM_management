@@ -1,13 +1,14 @@
 import zipfile
 from pathlib import Path
 import panel as pn
+from watchdog_service import WATCH_FOLDER , OUTPUT_FOLDER
 
 
 class Monitor_folder_backend:
     def __init__(self):
         # ===== CONFIG =====
-        self.INPUT_DIR = Path("apps/TXT_to_CSV/input_file")
-        self.OUTPUT_DIR = Path("apps/TXT_to_CSV/output_file")
+        self.INPUT_DIR = WATCH_FOLDER
+        self.OUTPUT_DIR = OUTPUT_FOLDER
 
         self.INPUT_DIR.mkdir(parents=True, exist_ok=True)
         self.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -57,6 +58,7 @@ class Monitor_folder_backend:
             button_type="success",
             button_style="outline",
             auto=True,
+            callback=self.download_all_outputs,
             disabled=True
         )
 
@@ -73,7 +75,6 @@ class Monitor_folder_backend:
             self.update_download_button,
             "value"
         )
-        self.btn_download_all.callback = self.download_all_outputs
 
         # initial load
         self.refresh_all()
@@ -135,8 +136,7 @@ class Monitor_folder_backend:
     def download_all_outputs(self):
         csv_files = list(self.OUTPUT_DIR.glob("*.csv"))
         if not csv_files:
-            self.btn_download_all.disabled = True
-            return
+            return None 
 
         zip_path = self.OUTPUT_DIR / "output_all.zip"
 
@@ -144,6 +144,4 @@ class Monitor_folder_backend:
             for file in csv_files:
                 zf.write(file, arcname=file.name)
 
-        self.btn_download_all.file = zip_path
-        self.btn_download_all.filename = "output_all.zip"
-        self.btn_download_all.disabled = False
+        return zip_path   
