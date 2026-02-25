@@ -66,6 +66,14 @@ raw_css =[
         """
 ]
 
+raw_css.append("""
+.bk-input-group label::before,
+.bk-input-group label::after {
+    display: none !important;
+    content: none !important;
+}
+""")
+
 pn.extension('tabulator',
              comms='default',
              loading_spinner='arcs',
@@ -104,6 +112,8 @@ def BOM_Management_page():
             pn.Spacer(),  
             backend.search_box,
             pn.Spacer(),
+            backend.view_button,
+            backend.view_dropdown,
             sizing_mode="stretch_width"
         ),
         backend.output_area,
