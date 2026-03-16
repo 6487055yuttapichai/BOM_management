@@ -66,7 +66,7 @@ raw_css =[
         """
 ]
 
-raw_css.append("""
+raw_css.append("""  
 .bk-input-group label::before,
 .bk-input-group label::after {
     display: none !important;
@@ -102,15 +102,9 @@ def BOM_Management_page():
     # Extract controls
     controls_column = pn.Column(
         pn.Row(
-            pn.Spacer(),
+            backend.search_box,
             backend.insert_button,
             backend.delete_button,
-            pn.Spacer(),
-            sizing_mode="stretch_width"
-        ),
-        pn.Row(
-            pn.Spacer(),  
-            backend.search_box,
             pn.Spacer(),
             backend.view_button,
             backend.view_dropdown,
@@ -120,7 +114,7 @@ def BOM_Management_page():
         backend.table,
         backend.pop_up_insert_form,
         backend.pop_up_edit_form,
-        height=1400
+        height=700
     )
     template.add_panel('BOM_Management', controls_column)
     template.add_panel('xl_download', backend.btn_table_excel_download)

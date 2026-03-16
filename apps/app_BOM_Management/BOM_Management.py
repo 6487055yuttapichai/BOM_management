@@ -11,8 +11,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
+from shared.view_table_column import ViewTableColumn
 
 pgsql = PGSQL()
+vtc = ViewTableColumn()
 
 class BOM_ManagementBackend:
     def __init__(self):
@@ -22,21 +24,21 @@ class BOM_ManagementBackend:
         self.insert_button = pn.widgets.Button(
             name="Add new item",
             button_type="primary",
-            width=200,
-            height=50
+            width=120,
+            height=35
         )
 
         self.delete_button = pn.widgets.Button(
             name="Delete item ",
             button_type="danger",
-            width=200,
-            height=50
+            width=120,
+            height=35
         )
 
         self.search_box = pn.widgets.TextInput(
             placeholder="Search Item ID or description...",
-            width=800,
-            height=50,
+            width=550,
+            height=35,
             styles={
                 'border': '1px solid #000000',
                 'border-radius': '5px'       
@@ -119,7 +121,6 @@ class BOM_ManagementBackend:
 
         # Data frame for table
         self.df: pd.DataFrame | None = None
-        self.filtered_df: pd.DataFrame | None = None
 
         # ---- table
         self.title = {
@@ -133,64 +134,46 @@ class BOM_ManagementBackend:
             "wall_thickness" : "Wall Thickness", 
             "wall_thickness_tolerance" : "Wall Thickness Tolerance" 
         }
+        text_align = {
+            "type" : "center", 
+            "nominal_tubing_size" : "center", 
+            "color" : "center", 
+            "tubing" : "center", 
+            "tubing_tolerance" : "center", 
+            "wall_thickness" : "center", 
+            "wall_thickness_tolerance" : "center" 
+        }
         self.table = pn.widgets.Tabulator(
-            pd.DataFrame(columns=self.title.values()),
             buttons={"edit": '<button class="btn btn-dark btn-sm">Edit</button>'},
             pagination="local",
-            page_size=30,
+            page_size=50,
             sizing_mode="stretch_width",
             show_index=False,
             disabled=True,
             selectable=True,
+            titles = self.title,
             theme = 'bootstrap5',
-            layout="fit_columns"
-        )
-        
-        # View Button for table
-        self.view_button = pn.widgets.Button(
-            name="View",
-            icon="sliders",
-            button_type="default",
-            width=150,
-            styles={
-                'border': '1px solid #000000',
-                'border-radius': '5px'       
-            }
+            layout="fit_data_table",
+            height=600,
+            text_align=text_align,
         )
 
-        # Checkbox Options for View Button
-        self.view_options = pn.widgets.CheckBoxGroup(
-            options=list(self.title.values()),
-            value=list(self.title.values()),
-            sizing_mode="stretch_width",
-        )
-        
+        # View Table Column section
+        self.selected_column = list(self.title.keys())
+        self.view_button = vtc.view_button
 
-        # Floating Dropdown for View Button
-        self.view_dropdown = pn.Column(
-            pn.Column(self.view_options, sizing_mode="stretch_width"),
-            visible=False,
-            css_classes=["view-dropdown-clean"],
-            styles={
-                "position": "absolute",
-                "top": "45px",
-                "right": "0px",
-                "background": "white",
-                "padding": "10px 12px",
-                "border-radius": "10px",
-                "box-shadow": "0px 12px 30px rgba(0,0,0,0.25)",
-                "z-index": "9999",
-                "width": "max-content",
-                "min-width": "200px",
-                "max-height": "400px",
-                "overflow-y": "auto",
-            },
-        )
+        requirement_title_list = ["Item ID","Description"]
+        self.view_options = vtc.get_view_options(list(self.title.values()),requirement_title_list)
+        self.view_dropdown = vtc.get_view_dropdown(self.view_options)
         
+        self.view_button.on_click(
+            lambda event: vtc.toggle_dropdown(event, self.view_dropdown)
+        )
 
-        # var for View Button
-        self.reverse_title = {v: k for k, v in self.title.items()}
-        self.selected_columns = self.view_options.value.copy()
+        self.view_options.param.watch(
+            self._on_column_change,
+            "value"
+        )
 
         # ---- downloads
         self.btn_table_csv_download = pn.widgets.FileDownload(
@@ -223,29 +206,22 @@ class BOM_ManagementBackend:
         self.btn_save_edit.on_click(lambda e: self.save_click("update"))
         self.btn_cancel_edit.on_click(lambda e: setattr(self.pop_up_edit_form, "open", False))
         self.delete_button.on_click(self.delete_row)
-        self.view_button.on_click(self.toggle_dropdown)
-        self.search_box.param.watch(lambda e: self.apply_filters(), "value")
-        self.view_options.param.watch(lambda e: self.apply_filters(), "value")
-        
-        # initial load
-        self.select_data()
+        self.search_box.param.watch(self.filter_table, "value")
 
 
     # ===== LOGIC Manange Page=====
     def select_data(self):
         rows = self.fetch_data()
         if rows is not None and not rows.empty:
-            self.df = rows.copy()
+            self.table.value = rows
         else:
-            self.df = pd.DataFrame(columns=self.title.values())
-
-        self.apply_filters()
+            self.table.value = pd.DataFrame()
 
     def save_click(self, type):
         if type == "update" and self.selected_row.get("row"):
             row = self.selected_row["row"]
             self.update_bom_master(
-                item_id = row["Item ID"],
+                item_id = row["item_id"],
                 description = self.description_update.value,
                 type = self.type_update.value,
                 nominal_tubing_size = self.nominal_tubing_size_update.value,
@@ -277,21 +253,21 @@ class BOM_ManagementBackend:
         if event.column != "edit":
             return
 
-        df = self.df
+        df = pd.DataFrame(self.table.value)
         row = df.iloc[event.row].to_dict()
         self.selected_row["row"] = row
 
         self.selected_ID.object = (
-            f"**selected Item ID :** **{row.get('Item ID')}**  \n")
+            f"**selected Item ID :** **{row.get('item_id')}**  \n")
 
-        self.description_update.value = row.get("Description","") or ""
-        self.type_update.value = row.get("Type","") or ""
-        self.nominal_tubing_size_update.value = row.get("Nominal Tubing Size","") or ""
-        self.color_update.value = row.get("Color","") or ""
-        self.tubing_update.value = float(row.get("Tubing") or 0)
-        self.tubing_tolerance_update.value = float(row.get("Tubing Tolerance") or 0)
-        self.wall_thickness_update.value = float(row.get("Wall Thickness") or 0)
-        self.wall_thickness_tolerance_update.value = float(row.get("Wall Thickness Tolerance") or 0)
+        self.description_update.value = row.get("description","") or ""
+        self.type_update.value = row.get("type","") or ""
+        self.nominal_tubing_size_update.value = row.get("nominal_tubing_size","") or ""
+        self.color_update.value = row.get("color","") or ""
+        self.tubing_update.value = float(row.get("tubing") or 0)
+        self.tubing_tolerance_update.value = float(row.get("tubing_tolerance") or 0)
+        self.wall_thickness_update.value = float(row.get("wall_thickness") or 0)
+        self.wall_thickness_tolerance_update.value = float(row.get("wall_thickness_tolerance") or 0)
 
 
         self.pop_up_edit_form.open = True
@@ -302,72 +278,46 @@ class BOM_ManagementBackend:
             return
 
         row = self.table.value.iloc[self.table.selection[0]]
-        msg = self.delete_bom_master(row["Item ID"])
+        msg = self.delete_bom_master(row["item_id"])
         self.output_area.object = msg
         self.table.value = self.table.value.drop(self.table.selection[0]).reset_index(drop=True)
 
-
-    def toggle_dropdown(self,event):
-        self.view_dropdown.visible = not self.view_dropdown.visible
-
-
-    def apply_filters(self):
-        if self.df is None:
-            return
-
-        df = self.df.copy()
-
-        # -------- Search --------
+    def filter_table(self, event):
         keyword = self.search_box.value.lower().strip()
-
-        if keyword:
-            df = df[
-                df["Item ID"].str.lower().str.contains(keyword, na=False) |
-                df["Description"].str.lower().str.contains(keyword, na=False)
-            ]
-
-        # -------- Column Order --------
-        selected_display = set(self.view_options.value)
-
-        ordered_columns = [
-            display
-            for key, display in self.title.items()
-            if display in selected_display
+        
+        
+        df = self.df.copy()
+        
+        if not keyword:
+            logger.info("Keyword for search is empty")
+            if self.selected_column:
+                self.table.value = df[self.selected_column]
+            else:
+                self.table.value = df
+            return
+        
+        filtered_df = df[
+            df["item_id"].str.lower().str.contains(keyword) |
+            df["description"].str.lower().str.contains(keyword)
         ]
+        
+        if self.selected_column:
+            filtered_df = filtered_df[self.selected_column]
 
-        if not ordered_columns:
-            ordered_columns = list(self.title.values())
-
-        # rebuild dataframe with correct order
-        self.filtered_df = df[ordered_columns]
-
-        self.table.value = self.filtered_df
+        self.table.value = filtered_df
 
     # ===== LOGIC Manange DB=====
     def fetch_data(self) -> pd.DataFrame:
         sql = """SELECT item_id, description, type, nominal_tubing_size, color, tubing, tubing_tolerance, wall_thickness, wall_thickness_tolerance FROM dbo.bom_master"""
-        
+        df = pd.DataFrame()
         try:
             df = pgsql.sql_to_df(query=sql, db='BOM_Management', mod='BOM_data')
-            
-            summary_df = self.format_colum_name(df)
+            self.df = df.copy()
+            summary_df = df
             return summary_df
         except Exception as ex:
             logger.error(f"| Exception | {str(ex)}")
 
-    def format_colum_name(self,df):
-        summary_df = df.rename(columns={
-            "item_id" : "Item ID", 
-            "description" : "Description" , 
-            "type" : "Type", 
-            "nominal_tubing_size" : "Nominal Tubing Size", 
-            "color" : "Color", 
-            "tubing" : "Tubing", 
-            "tubing_tolerance" : "Tubing Tolerance", 
-            "wall_thickness" : "Wall Thickness", 
-            "wall_thickness_tolerance" : "Wall Thickness Tolerance" 
-        })
-        return summary_df
 
     def insert_into_bom_master(self,
             item_id,
@@ -503,3 +453,16 @@ class BOM_ManagementBackend:
         output.seek(0)
 
         return output
+
+    def _on_column_change(self, event):
+        if self.df is None or self.df.empty:
+            return
+
+        ordered_keys = vtc.get_ordered_keys(
+            self.view_options,
+            self.title
+        )
+
+        self.selected_column = ordered_keys
+
+        self.filter_table(None)

@@ -58,11 +58,16 @@ class TxtFileHandler(FileSystemEventHandler):
                     desc = match.group(1).strip()
                     tubing_items.append((current_item_number, desc, Inv_Unt, Net_Quantity))
             Item_In_DB = Matching_file_with_DB(tubing_items)
+
             
             # Create DataFrame
-            df =  pd.DataFrame(Item_In_DB, columns=["Item ID", "Description", "Inv Unt", "Net Quantity"])
             base_name = os.path.splitext(os.path.basename(file_path))[0]
-            df["chassi"] = base_name
+            if len(Item_In_DB) > 0:
+                df =  pd.DataFrame(Item_In_DB, columns=["Item ID", "Description", "Inv Unt", "Net Quantity"])
+                df["chassi"] = base_name
+            elif len(Item_In_DB) == 0:
+                logger.info(f"| Data not found in the database.")
+                df = pd.DataFrame(["No part IDs were found in the master part list. Please validate the part IDs and try again."], columns=["Error:"])
 
             # SAVE CSV FILE
             os.makedirs(OUTPUT_FOLDER, exist_ok=True)
